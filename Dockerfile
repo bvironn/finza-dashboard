@@ -19,7 +19,9 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
 
 COPY --from=build /build/dist ./dist
+COPY drizzle ./drizzle
+COPY scripts/migrate-prod.ts ./migrate.ts
 
 EXPOSE 3001
 
-CMD ["node", "dist/server/entry.mjs"]
+CMD ["sh", "-c", "bun run migrate.ts && node dist/server/entry.mjs"]

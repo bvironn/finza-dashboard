@@ -12,9 +12,9 @@ services:
       DATABASE_USER: root
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       DATABASE_NAME: ${DATABASE_NAME:-finza}
-      BACKEND_PORT: 3001
       JWT_SECRET: ${JWT_SECRET}
-      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      HOST: "0.0.0.0"
+      PORT: "3001"
     depends_on:
       mariadb:
         condition: service_healthy

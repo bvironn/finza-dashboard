@@ -1,27 +1,25 @@
-# ─── Build frontend with Node ──────────────────────────────────────
-FROM node:22-slim AS frontend-build
+# ─── Build (Bun) ─────────────────────────────────────────────────
+FROM oven/bun:1 AS build
 WORKDIR /build
-COPY packages/frontend/package.json ./
-RUN npm install
-COPY packages/frontend/ ./
-COPY package.json /build/root-pkg.json
-RUN VERSION=$(node -e "console.log(require('./root-pkg.json').version)") && \
-    VITE_APP_VERSION=$VERSION npx vite build
-
-# ─── Production (Bun runtime) ─────────────────────────────────────
-FROM oven/bun:1
-WORKDIR /app
-ENV NODE_ENV=production
 
 COPY package.json bun.lock ./
-COPY packages/backend/package.json packages/backend/
-COPY packages/frontend/package.json packages/frontend/
-RUN bun install
+RUN bun install --frozen-lockfile
 
-COPY packages/backend/ packages/backend/
-COPY --from=frontend-build /build/dist packages/backend/frontend-dist
+COPY . .
+RUN bun run build
 
-WORKDIR /app/packages/backend
+# ─── Production ──────────────────────────────────────────────────
+FROM oven/bun:1-slim
+WORKDIR /app
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3001
+
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
+
+COPY --from=build /build/dist ./dist
+
 EXPOSE 3001
 
-CMD ["bun", "run", "src/index.ts"]
+CMD ["node", "dist/server/entry.mjs"]

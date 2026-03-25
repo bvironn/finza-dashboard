@@ -1,0 +1,8 @@
+---
+import Layout from "@/layouts/Layout.astro"
+import { ProtectedPage } from "@/components/common/page-mount"
+---
+
+<Layout title="Finza — Configuración">
+  <ProtectedPage client:only="react" page="/configuracion" transition:persist="app" />
+</Layout>
